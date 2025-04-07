@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background-color: #003366;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            padding: 20px 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        section {
+            margin-top: 60px;
+            margin: 90px auto 20px auto;
+            padding: 40px 20px;
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.5s ease-in-out;
+            scroll-margin-top: 100px;
+        }
+
+        section:hover {
+            transform: scale(1.03);
+        }
+
+        #about {
+            background: url('about-texture.jpg') repeat;
+        }
+
+        #skills {
+            background: url('skills-texture.jpg') repeat;
+        }
+
+        #projects {
+            background: url('projects-texture.jpg') repeat;
+        }
+
+        #contact {
+            background: url('contact-texture.jpg') repeat;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 350px;
+            height: 250px;
+            perspective: 1000px;
+            margin: 20px auto;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            min-height: 250px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .flip-card-front {
+            background-color: #f1f1f1;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flip-card-back {
+            background-color: #003366;
+            color: white;
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #003366;
+            color: white;
+            margin-top: 80px;
+        }
+
+        /* Game Styles */
+        #game {
+            background: url('game-texture.jpg') repeat;
+            padding: 40px 20px;
+            margin: 90px auto 20px auto;
+            max-width: 900px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            background-color: #fff;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .cell:hover {
+            background-color: #e6f7ff;
+        }
+
+        #restart-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: #003366;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background-color: green;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .toggle-circle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s ease;
+        }
+
+        .toggle-switch.hard {
+            background-color: red;
+        }
+
+        .toggle-switch.hard .toggle-circle {
+            left: 33px;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .board {
+                grid-template-columns: repeat(3, 80px);
+                grid-template-rows: repeat(3, 80px);
+            }
+
+            .cell {
+                font-size: 2rem;
+            }
+
+            #restart-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .toggle-switch {
+                width: 50px;
+                height: 25px;
+            }
+
+            .toggle-circle {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .board {
+                grid-template-columns: repeat(3, 60px);
+                grid-template-rows: repeat(3, 60px);
+            }
+
+            .cell {
+                font-size: 1.5rem;
+            }
+
+            #restart-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .toggle-switch {
+                width: 40px;
+                height: 20px;
+            }
+
+            .toggle-circle {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#about">About Me</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#game">Game</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="about">
+        <h1>About Me</h1>
+        <p>Hey there! I'm Dinesh Ravi, a Software Engineer with a strong background in Machine Learning, AI, and NLP.
+            With a PGP in Business Analytics from IIT Madras, I specialize in AI-driven solutions, deep learning, and
+            data processing. My expertise includes Python, TensorFlow, LangChain, Hugging Face, OpenAI, and vector
+            databases. I have experience building intelligent systems that optimize business processes, automate
+            decision-making, and improve operational efficiency.
+    </section>
+
+    <section id="skills">
+        <h2>Skills</h2>
+        <p>Programming: Python, SQL, Docker, Regex
+            Machine Learning: Linear Regression, Logistic Regression, Random Forest, XGBoost, Gradient Boosting, Naïve
+            Bayes
+            Deep Learning: ANN, CNN, RNN, LSTM, GRU
+            NLP: NER, Text Classification, BERT, GPT, LLAMA-2, RAG, Transformers
+            Data Engineering: ETL Pipelines, Text Chunking, Embedding, Data Preprocessing
+            Model Deployment: Optimization, Fine-Tuning, Production Deployment
+            Statistics & Probability
+    </section>
+
+    <section id="projects" class="project-container">
+        <h2>Projects</h2>
+        <div class="flip-card-container">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">AI-Based HR Chatbot</div>
+                    <div class="flip-card-back">
+                        Developed an AI-powered chatbot using IBM Watson to assist with policy inquiries and HR
+                        processes.
+                        ✅ Session title generation
+                        ✅ Dynamic Q&A with sourced citations
+                        ✅ Chat history retrieval for seamless conversations
+                        **Tech Stack:** IBM Watson, Python, NLP, REST APIs, Vector Databases
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"> AI Claim Assist Solution</div>
+                    <div class="flip-card-back">
+                        Built an automated invoice processing system for a US-based insurance client, optimizing
+                        adjuster assignment.
+                        🚀 25% reduction in manual effort
+                        🚀 18% improvement in adjuster accuracy
+                        🚀 30% boost in operational efficiency using NLP
+                        **Tech Stack:** Python, TensorFlow, spaCy, LangChain, Hugging Face (LLAMA-2), OpenAI
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"> Intelligent Batch Optimization</div>
+                    <div class="flip-card-back">
+                        Optimized moisture levels in tobacco leaves using AI-driven parameter control.
+                        📌 Genetic Algorithm & Random Forest for moisture balance
+                        📌 Enhanced smoking experience & improved leaf processing
+                        **Tech Stack:** Python, Machine Learning
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Contact</h2>
+        <p>Mobile No.: +91 9790956597</p>
+        <p>Email: <a href="mailto:your.email@example.com">rddinesh1696@gmail.com</a></p>
+        <p>LinkedIn: <a href="https://www.linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a>
+        </p>
+        <p>GitHub: <a href="https://github.com/yourgithub" target="_blank">github.com/yourgithub</a></p>
+    </section>
+
+    <!-- Game Section -->
+    <section id="game">
+        <h2>Tic Tac Toe Game</h2>
+        <div id="game-container">
+            <p id="message">Your Turn!</p>
+
+            <!-- Toggle Switch for Easy/Hard Mode -->
+            <div class="toggle-switch" id="mode-toggle">
+                <div class="toggle-circle"></div>
+            </div>
+
+            <div class="board" id="board"></div>
+            <button id="restart-btn">Restart Game</button>
+        </div>
+
+        <!-- Confetti Canvas -->
+        <canvas id="confetti-canvas"></canvas>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 rD. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const board = document.getElementById('board');
+        const message = document.getElementById('message');
+        const restartBtn = document.getElementById('restart-btn');
+        const modeToggle = document.getElementById('mode-toggle');
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const confettiContext = confettiCanvas.getContext('2d');
+
+        let cells = Array(9).fill('');
+        const player = 'X';
+        const ai = 'O';
+        let gameOver = false;
+        let hardMode = false;
+        let isAITurn = false;
+
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+
+        let confettiParticles = [];
+
+        function createBoard() {
+            board.innerHTML = '';
+            cells.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.classList.add('cell');
+                cellElement.dataset.index = index;
+                cellElement.textContent = cell;
+                board.appendChild(cellElement);
+            });
+        }
+
+        function checkWinner(symbol) {
+            return winningCombos.some(combo =>
+                combo.every(index => cells[index] === symbol)
+            );
+        }
+
+        function handleClick(event) {
+            if (isAITurn) return;
+
+            const index = event.target.dataset.index;
+            if (!index || cells[index] !== '' || gameOver) return;
+
+            cells[index] = player;
+            createBoard();
+
+            if (checkWinner(player)) {
+                message.innerText = "🔥 You Win!";
+                startConfetti();
+                autoRestart();
+                return;
+            }
+
+            if (!cells.includes('')) {
+                message.innerText = "😐 It's a Draw!";
+                startConfetti();
+                autoRestart();
+                return;
+            }
+
+            isAITurn = true;
+
+            setTimeout(() => {
+                hardMode ? aiMoveHard() : aiMoveEasy();
+                createBoard();
+
+                if (checkWinner(ai)) {
+                    message.innerText = "🤖 AI Wins!";
+                    startConfetti();
+                    autoRestart();
+                } else if (!cells.includes('')) {
+                    message.innerText = "😐 It's a Draw!";
+                    startConfetti();
+                    autoRestart();
+                }
+
+                isAITurn = false;
+            }, 800);
+        }
+
+        function aiMoveEasy() {
+            const emptyCells = cells.map((val, i) => val === '' ? i : null).filter(v => v !== null);
+            const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            cells[randomIndex] = ai;
+        }
+
+        function aiMoveHard() {
+            const bestMove = minimax(cells, ai).index;
+            cells[bestMove] = ai;
+        }
+
+        function minimax(newBoard, playerTurn) {
+            const emptyCells = newBoard.map((val, i) => val === '' ? i : null).filter(v => v !== null);
+
+            if (checkWinner(ai)) return { score: +1 };
+            if (checkWinner(player)) return { score: -1 };
+            if (emptyCells.length === 0) return { score: 0 };
+
+            const moves = [];
+
+            for (let i of emptyCells) {
+                let move = {};
+                move.index = i;
+
+                newBoard[i] = playerTurn;
+
+                const result = playerTurn === ai
+                    ? minimax(newBoard, player)
+                    : minimax(newBoard, ai);
+
+                move.score = result.score;
+
+                newBoard[i] = '';
+                moves.push(move);
+            }
+
+            return moves.reduce((bestMove, move) => {
+                if (
+                    (playerTurn === ai && move.score > bestMove.score) ||
+                    (playerTurn === player && move.score < bestMove.score)
+                ) {
+                    return move;
+                }
+                return bestMove;
+            }, { score: playerTurn === ai ? -Infinity : Infinity });
+        }
+
+        function startConfetti() {
+            for (let i = 0; i < 300; i++) {
+                confettiParticles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height,
+                    r: Math.random() * 5 + 2,
+                    d: Math.random() * 2 + 2,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`
+                });
+            }
+            drawConfetti();
+            setTimeout(stopConfetti, 3000);
+        }
+
+        function drawConfetti() {
+            confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            confettiParticles.forEach(p => {
+                confettiContext.beginPath();
+                confettiContext.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                confettiContext.fillStyle = p.color;
+                confettiContext.fill();
+                p.y += p.d;
+            });
+            requestAnimationFrame(drawConfetti);
+        }
+
+        function stopConfetti() {
+            confettiParticles = [];
+        }
+
+        function autoRestart() {
+            setTimeout(restartGame, 2000);
+        }
+
+        function restartGame() {
+            cells = Array(9).fill('');
+            gameOver = false;
+            isAITurn = false;
+            message.innerText = 'Your Turn!';
+            createBoard();
+        }
+
+        function toggleMode() {
+            hardMode = !hardMode;
+            modeToggle.classList.toggle('hard', hardMode);
+            restartGame();
+        }
+
+        board.addEventListener('click', handleClick);
+        restartBtn.addEventListener('click', restartGame);
+        modeToggle.addEventListener('click', toggleMode);
+
+        createBoard();
+    </script>
+</body>
+
+</html>

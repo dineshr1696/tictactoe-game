@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe with AI Mode Toggle</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    #game-container {
+      text-align: center;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      background-color: #fff;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.2s ease;
+    }
+
+    .cell:hover {
+      background-color: #e6f7ff;
+    }
+
+    #restart-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: white;
+      background-color: #003366;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    /* Toggle switch */
+    .toggle-switch {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background-color: green;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .toggle-circle {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background-color: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: 0.3s ease;
+    }
+
+    .toggle-switch.hard {
+      background-color: red;
+    }
+
+    .toggle-switch.hard .toggle-circle {
+      left: 33px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="game-container">
+    <h1>🎯 Tic Tac Toe - AI Mode</h1>
+    <p id="message">Your Turn!</p>
+
+    <!-- Toggle Switch for Easy/Hard Mode -->
+    <div class="toggle-switch" id="mode-toggle">
+      <div class="toggle-circle"></div>
+    </div>
+
+    <div class="board" id="board"></div>
+    <button id="restart-btn">Restart Game</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.0.0"></script>
+
+  <script>
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+    const restartBtn = document.getElementById('restart-btn');
+    const modeToggle = document.getElementById('mode-toggle');
+
+    let cells = Array(9).fill('');
+    const player = 'X';
+    const ai = 'O';
+    let gameOver = false;
+    let hardMode = false;
+    let isAITurn = false;
+
+    const winningCombos = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function createBoard() {
+      board.innerHTML = '';
+      cells.forEach((cell, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('cell');
+        cellElement.dataset.index = index;
+        cellElement.textContent = cell;
+        board.appendChild(cellElement);
+      });
+    }
+
+    function checkWinner(symbol) {
+      return winningCombos.some(combo =>
+        combo.every(index => cells[index] === symbol)
+      );
+    }
+
+    function handleClick(event) {
+      if (isAITurn) return;
+
+      const index = event.target.dataset.index;
+      if (!index || cells[index] !== '' || gameOver) return;
+
+      cells[index] = player;
+      createBoard();
+
+      if (checkWinner(player)) {
+        message.innerText = "🔥 You Win!";
+        gameOver = true;
+        launchConfetti();
+        autoRestart();
+        return;
+      }
+
+      if (!cells.includes('')) {
+        message.innerText = "😐 It's a Draw!";
+        gameOver = true;
+        autoRestart();
+        return;
+      }
+
+      isAITurn = true;
+
+      setTimeout(() => {
+        hardMode ? aiMoveHard() : aiMoveEasy();
+        createBoard();
+
+        if (checkWinner(ai)) {
+          message.innerText = "🤖 AI Wins!";
+          gameOver = true;
+          autoRestart();
+        } else if (!cells.includes('')) {
+          message.innerText = "😐 It's a Draw!";
+          gameOver = true;
+          autoRestart();
+        }
+
+        isAITurn = false;
+      }, 800);
+    }
+
+    function aiMoveEasy() {
+      const emptyCells = cells.map((val, i) => val === '' ? i : null).filter(v => v !== null);
+      const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      cells[randomIndex] = ai;
+    }
+
+    function aiMoveHard() {
+      const bestMove = minimax(cells, ai).index;
+      cells[bestMove] = ai;
+    }
+
+    function minimax(newBoard, playerTurn) {
+      const emptyCells = newBoard.map((val, i) => val === '' ? i : null).filter(v => v !== null);
+
+      if (checkWinner(ai)) return { score: +1 };
+      if (checkWinner(player)) return { score: -1 };
+      if (emptyCells.length === 0) return { score: 0 };
+
+      const moves = [];
+
+      for (let i of emptyCells) {
+        let move = {};
+        move.index = i;
+
+        newBoard[i] = playerTurn;
+
+        const result = playerTurn === ai
+          ? minimax(newBoard, player)
+          : minimax(newBoard, ai);
+
+        move.score = result.score;
+
+        newBoard[i] = '';
+        moves.push(move);
+      }
+
+      return moves.reduce((bestMove, move) => {
+        if (
+          (playerTurn === ai && move.score > bestMove.score) ||
+          (playerTurn === player && move.score < bestMove.score)
+        ) {
+          return move;
+        }
+        return bestMove;
+      }, { score: playerTurn === ai ? -Infinity : Infinity });
+    }
+
+    function launchConfetti() {
+      confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+    }
+
+    function autoRestart() {
+      setTimeout(restartGame, 2000);
+    }
+
+    function restartGame() {
+      cells = Array(9).fill('');
+      gameOver = false;
+      isAITurn = false;
+      message.innerText = 'Your Turn!';
+      createBoard();
+    }
+
+    function toggleMode() {
+      hardMode = !hardMode;
+      modeToggle.classList.toggle('hard', hardMode);
+      // document.body.style.backgroundColor = hardMode ? '#ffcccc' : '#f0f8ff';
+      restartGame();
+    }
+
+    board.addEventListener('click', handleClick);
+    restartBtn.addEventListener('click', restartGame);
+    modeToggle.addEventListener('click', toggleMode);
+
+    createBoard();
+  </script>
+</body>
+
+</html>

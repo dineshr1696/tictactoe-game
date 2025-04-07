@@ -1,0 +1,53 @@
+Tic Tac Toe - AI Mode
+A fun and intelligent Tic Tac Toe game with AI mode, built using HTML, CSS, and JavaScript.
+The AI is designed to think strategically and make smart moves, not just random guesses.
+
+🚀 Tech Stack Used
+Technology	Version Used
+HTML	HTML5
+CSS	CSS3
+JavaScript	ES6+
+🧐 What kind of AI is used here?
+The AI logic is built using:
+
+✅ Greedy Algorithm
+✅ Basic Decision Tree Logic
+🤖 How does the AI play smarter?
+AI Strategy	What happens internally?
+✅ Greedy Algorithm	AI prioritizes the winning move first
+✅ Basic Decision Tree Logic	If winning is not possible, AI blocks the player from winning
+✅ Random Move	If neither winning nor blocking is possible, AI plays a random safe move
+🔍 How Greedy Algorithm + Decision Tree Logic works here:
+1️⃣ Greedy Algorithm:
+The AI greedily checks for the winning move first (If placing 'O' can make it win, it takes that move immediately).
+2️⃣ Basic Decision Tree Logic:
+If the winning move is not available, the AI checks all possible moves and blocks the player (X) from winning.
+3️⃣ Random Move (Fallback):
+If neither winning nor blocking is possible, the AI randomly picks an empty cell.
+💡 Why is this AI smarter than normal JavaScript games?
+Normal JS Game	This AI Game
+Makes random moves	Uses Greedy Algorithm
+No strategy to block the player	Uses Decision Tree Logic to block player
+No thinking process	AI analyzes the board before every move
+📂 Project Structure
+bash
+Copy
+Edit
+Tic-Tac-Toe-AI/
+│
+├── index.html      # Main HTML file
+├── style.css        # Styling file
+├── script.js         # AI logic and game functionality
+└── confetti.js      # Confetti animation for winner celebration
+🛠️ How to Run the Project
+Download the code or clone the repository.
+Open the index.html file in your browser.
+Enjoy the battle between Human vs AI! 🧠⚡️
+🎯 AI's Random Win/Lose Messages
+"🔥 You crushed the AI! 😎"
+"💪 Insane Moves! You're unstoppable!"
+"🎯 You're smarter than the AI today!"
+"🤖 AI flexes on you! Try again! 😅"
+"😂 Bruh... even ChatGPT ain't that good!"
+
+🎮 Play the Game and Challenge the AI!

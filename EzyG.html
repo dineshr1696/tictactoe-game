@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe - AI Mode</title>
+  <style>
+    /* Basic styling for the page */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    /* Main game container */
+    #game-container {
+      text-align: center;
+    }
+
+    /* Board design (3x3 grid) */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    /* Individual cell styling */
+    .cell {
+      background-color: #fff;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Hover effect */
+    .cell:hover {
+      background-color: #e6f7ff;
+    }
+
+    /* Restart button */
+    #restart-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Button hover effect */
+    #restart-btn:hover {
+      background-color: #0055a4;
+    }
+
+    /* Confetti canvas (for celebration) */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="game-container">
+    <h1>🎯 Tic Tac Toe - AI Mode</h1>
+    <p id="message">Your Turn!</p>
+    <div class="board" id="board"></div>
+    <button id="restart-btn">Restart Game</button>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti"></canvas>
+
+  <script>
+    // DOM elements
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+    const restartBtn = document.getElementById('restart-btn');
+
+    // Game variables
+    let cells = Array(9).fill(''); // Empty board (9 cells)
+    const player = 'X'; // Human player
+    const ai = 'O'; // AI opponent
+    let gameOver = false; // Track game status
+
+    // Winning combinations (rows, columns, diagonals)
+    const winningCombos = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]            // Diagonals
+    ];
+
+    // 🎯 Function to create the game board
+    function createBoard() {
+      board.innerHTML = ''; // Clear the board
+      cells.forEach((cell, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('cell');
+        cellElement.dataset.index = index; // Store cell index for identification
+        cellElement.textContent = cell; // X or O
+        board.appendChild(cellElement);
+      });
+    }
+
+    // ✅ Function to check for a winner
+    function checkWinner(symbol) {
+      return winningCombos.some(combo =>
+        combo.every(index => cells[index] === symbol)
+      );
+    }
+
+    // 🧠 AI's logic to make a move
+    function aiMove() {
+      const emptyCells = cells.map((val, i) => val === '' ? i : null).filter(v => v !== null);
+
+      // Step 1: AI tries to win
+      for (let index of emptyCells) {
+        cells[index] = ai;
+        if (checkWinner(ai)) return; // If AI can win, place the move
+        cells[index] = ''; // Undo move
+      }
+
+      // Step 2: Block player's winning move
+      for (let index of emptyCells) {
+        cells[index] = player;
+        if (checkWinner(player)) {
+          cells[index] = ai; // Block player
+          return;
+        }
+        cells[index] = '';
+      }
+
+      // Step 3: Random move if no threat
+      const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      cells[randomIndex] = ai;
+    }
+
+    // 🎯 Handle player's click on the cell
+    function handleClick(event) {
+      const index = event.target.dataset.index; // Get the cell index
+      if (!index || cells[index] !== '' || gameOver) return; // Ignore if already filled
+
+      // Player's move
+      cells[index] = player;
+      createBoard(); // Update board
+
+      // Check if player wins
+      if (checkWinner(player)) {
+        message.innerText = getRandomWinMessage();
+        startConfetti();
+        endGame();
+        return;
+      }
+
+      // Check for draw after player's move
+      if (!cells.includes('')) {
+        message.innerText = "😐 Match Draw!";
+        startConfetti();
+        endGame();
+        return;
+      }
+
+      // AI makes a move after 800ms delay
+      setTimeout(() => {
+        aiMove();
+        createBoard();
+
+        if (checkWinner(ai)) {
+          message.innerText = getRandomLoseMessage();
+          startConfetti();
+          endGame();
+        } else if (!cells.includes('')) {
+          message.innerText = "😐 Match Draw!";
+          startConfetti();
+          endGame();
+        }
+      }, 800);
+    }
+
+    // 🛑 End game and auto-restart after 3 seconds
+    function endGame() {
+      gameOver = true;
+      setTimeout(restartGame, 3000);
+    }
+
+    // 🔄 Restart the game
+    function restartGame() {
+      cells = Array(9).fill('');
+      gameOver = false;
+      message.innerText = 'Your Turn!';
+      createBoard();
+    }
+
+    // 🎉 Random winning message for player
+    function getRandomWinMessage() {
+      const winMessages = [
+        "🔥 You crushed the AI! 😎",
+        "💪 Insane Moves! You're unstoppable!",
+        "🎯 You're smarter than the AI today!"
+      ];
+      return winMessages[Math.floor(Math.random() * winMessages.length)];
+    }
+
+    // 🤖 Random losing message if AI wins
+    function getRandomLoseMessage() {
+      const loseMessages = [
+        "🤖 AI flexes on you! Try again! 😅",
+        "💡 You're just letting me win, right?",
+        "😂 Bruh... even ChatGPT ain't that good!"
+      ];
+      return loseMessages[Math.floor(Math.random() * loseMessages.length)];
+    }
+
+    // 🎉 Confetti Animation
+    const confettiCanvas = document.getElementById('confetti');
+    const confettiContext = confettiCanvas.getContext('2d');
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+
+    let confettiParticles = [];
+
+    function startConfetti() {
+      for (let i = 0; i < 300; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height,
+          r: Math.random() * 5 + 2,
+          d: Math.random() * 2 + 2,
+          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+        });
+      }
+      drawConfetti();
+      setTimeout(stopConfetti, 3000);
+    }
+
+    function drawConfetti() {
+      confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiParticles.forEach(p => {
+        confettiContext.beginPath();
+        confettiContext.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        confettiContext.fillStyle = p.color;
+        confettiContext.fill();
+        p.y += p.d;
+      });
+      requestAnimationFrame(drawConfetti);
+    }
+
+    function stopConfetti() {
+      confettiParticles = [];
+    }
+
+    // Event listeners
+    board.addEventListener('click', handleClick);
+    restartBtn.addEventListener('click', restartGame);
+
+    // Initial board setup
+    createBoard();
+  </script>
+</body>
+
+</html>
